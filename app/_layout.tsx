@@ -1,1 +1,9 @@
-// Raíz de la app: tema, providers globales y barra de navegación inferior
+// Layout raíz de navegación de la aplicación. 
+import { Stack } from 'expo-router'; 
+
+export default function RootLayout() {
+    return <Stack/>
+}
+
+
+
