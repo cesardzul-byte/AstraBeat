@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "astrabeat-tmp",
-    "slug": "astrabeat-tmp",
+    "name": "AstraBeat",
+    "slug": "astrabeat",
     "version": "1.0.0",
-    "scheme": "astrabeat-tmp",
+    "scheme": "astrabeat",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
