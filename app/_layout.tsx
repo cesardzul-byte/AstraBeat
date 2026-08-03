@@ -2,10 +2,10 @@
 import { Stack } from 'expo-router'; 
 
 // Se realiza la importanción correspondiente del objeto de tokens 
-import { colors} from '../src/theme/tokens';
+import { colors } from '../src/theme/tokens';
 
 /**
- * Layout raíz de AstraBEat
+ * Layout raíz de AstraBeat
  * 
  * Define la configuración visual compartida del encabezado 
  * y registra las pantallas principales de la aplicación

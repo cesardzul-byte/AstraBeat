@@ -21,7 +21,7 @@ export default function Statistics() {
         <View style={styles.container}>
             {/* Título de la pantalla */}
             <Text style={styles.title}>
-                Contenido de las estadísticas de música
+                Estadísticas
             </Text>
 
             {/* Descripción secundaria */}

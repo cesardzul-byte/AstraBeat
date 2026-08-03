@@ -4,6 +4,16 @@
 
 ### Fase 0.5
 
-Se hizo uso de StyleSheet.Create(). Método que reúne los estilos de un componente, detecta propiedades inválidas mediante TypeScript y evita repetir objetos dentro del JSX.
+Se hizo uso de StyleSheet.create(). Método que reúne los estilos de un componente, detecta propiedades inválidas mediante TypeScript y evita repetir objetos dentro del JSX.
 
 Cambio en app/index.tsx
+
+### Fase 0.6
+
+Se  configura el stack en _layout mediante:
+
+1. Importación de colors desde los tokens
+2. Uso de screenOptions para oscurecer el encabezado
+3. Declaración de las pantallas para establecer títulos adecuados
+
+El resultado ha sido una interfaz completamente oscura, encabezados con nombres legibles y flechas de regreso visible en Reproductor y Estadística.
