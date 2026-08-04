@@ -17,3 +17,9 @@ Se  configura el stack en _layout mediante:
 3. Declaración de las pantallas para establecer títulos adecuados
 
 El resultado ha sido una interfaz completamente oscura, encabezados con nombres legibles y flechas de regreso visible en Reproductor y Estadística.
+
+## Fase 1
+
+### Fase 1.1
+
+Se prepara el accedo a la música, creando la función que solicita acceso en src/library/scanner.ts
