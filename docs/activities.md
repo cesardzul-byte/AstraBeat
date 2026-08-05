@@ -23,3 +23,7 @@ El resultado ha sido una interfaz completamente oscura, encabezados con nombres 
 ### Fase 1.1
 
 Se prepara el accedo a la música, creando la función que solicita acceso en src/library/scanner.ts
+
+### Fase 1.2
+
+Se integró en la pantalla de biblioteca el flujo para solicitar acceso a los archivos de audio del dispositivo

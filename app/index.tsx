@@ -1,5 +1,10 @@
 // Pantalla principal: biblioteca de canciones del dispositivo
-import { StyleSheet, View, Text } from 'react-native';
+import { 
+    ActivityIndicator,
+    Pressable,
+    StyleSheet, 
+    View, 
+    Text } from 'react-native';
 
 // Link representa navegación declarativa: Se declara el destino mediante 'href' y Expo Router se encarga de cambiar de pantalla sin tener
 // que llamar manualmente a una función. 
@@ -14,6 +19,24 @@ import {
     radii,
 } from '../src/theme/tokens'; 
 
+import { useState } from 'react';  
+
+import {
+    requestLibraryPermission,
+} from '../src/library/scanner'; 
+
+/**
+ * Estados posibles de la solicitud de permiso
+ * 
+ * Se usa un estado de cuatro valores porque un booleano no permitiría
+ * diferenciar entre "no solicitado" y "rechazado".
+ */
+type PermissionState =
+    | 'idle'
+    | 'requesting'
+    | 'granted'
+    | 'denied';
+
 /**
  * Vista principal de AstraBeat
  * 
@@ -21,6 +44,31 @@ import {
  * las vistas de reproductor y estadísticas.
  */
 export default function Library() {
+    // Al iniciar la pantalla, el permiso aún no se ha solicitdo
+    const [permissionState, setPermissionState]=
+    useState<PermissionState>('idle');
+
+    /**
+     * Solicita acceso a la biblioteca de música del dispositivo y actualiza la interfaz
+     * de acuerdo a la respuesta del usuario
+     */
+    async function handleRequestPermission(){
+        // Evita que el botón apareza mientras se espera la respuesta del usuario
+        setPermissionState('requesting');
+
+        try {
+            const granted = await requestLibraryPermission();
+
+            setPermissionState(granted ? 'granted' : 'denied');
+        } catch {
+            /**
+             * Durante esta etapa cualquier error inesperado se considera como acceso rechazado
+             * (Más adelante se revisará la posibilidad de añadir un estado independiente para distinguir
+             * errores técnicos)
+             */
+            setPermissionState('denied');
+        }
+    }
     return (
         // Contenedor principal de la pantalla
         <View style={styles.container}>
@@ -33,6 +81,37 @@ export default function Library() {
             <Text style={styles.description}>
                 Contenido de la biblioteca de musica
                 </Text>
+            {/**
+             * Renderizado condicional del permiso, solo se mmuestra el elemento correspondiente
+             * al estado actual de la solicitud de permiso
+             */}
+            {permissionState === 'idle' && (
+                <Pressable
+                    style={styles.permissionButton}
+                    onPress={handleRequestPermission}
+                >
+                    <Text style={styles.buttonText}>
+                    Permitir acceso a la biblioteca de música
+                    </Text>
+                </Pressable>
+            )}
+
+            {permissionState === 'requesting' && (
+                <ActivityIndicator color={colors.accent}/>
+            )}
+
+            {permissionState === 'granted' && (
+                <Text style={styles.status}>
+                    Acceso concedido. La biblioteca de música está disponible.
+                </Text>
+            )}
+
+            {permissionState === 'denied' && (
+                <Text style={styles.status}>
+                    AstraBeat no tiene permiso para acceder a la biblioteca de música. 
+                    Por favor, habilite el acceso en la configuración del dispositivo.
+                </Text>
+            )}
 
             {/* Enlace de navegación hacia app/player.tsx */}
             <Link href="/player" style={styles.link}>
@@ -72,21 +151,35 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     description: {
-        // Usa un color que destaca menos para la información secundaria
+        // Reduce la jerarquí visual de la información secundaria
         color: colors.textMuted,
-        // Aplica el tamaño normal del texto
         fontSize: fontSizes.body,
     },
     link: {
-        // Usa el violeta de AstraBeat para los enlaces (destacar)
+        // Destaca los enlaces mediante el color de acento
         color: colors.accent,
-        // Coloca el enlace sobre una superficie más clara
         backgroundColor: colors.surface,
-        // Mantiene un tamaño de fuente legible y coherente con el resto del texto 
         fontSize: fontSizes.body,
-        // Agrega espacio en el interior para darle apariencia de botón
         padding: spacing.md, 
-        // Redondea las esquinas del enlace
         borderRadius: radii.md,
+    },
+    permissionButton: {
+        // Impide que el botón se extienda por todo el ancho disponible
+        alignSelf: 'flex-start',
+        backgroundColor: colors.accent,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        borderRadius: radii.md,
+    },
+    buttonText: {
+        // Contrasta el texto con el fondo violeta del botón
+        color: colors.background,
+        fontSize: fontSizes.body,
+        fontWeight: '700',
+    },
+    status: {
+        // Mantiene los mensajes de información en una jerarquía secundaria
+        color: colors.textMuted,
+        fontSize: fontSizes.body,
     },
 }); 
