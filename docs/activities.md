@@ -27,3 +27,10 @@ Se prepara el accedo a la música, creando la función que solicita acceso en sr
 ### Fase 1.2
 
 Se integró en la pantalla de biblioteca el flujo para solicitar acceso a los archivos de audio del dispositivo
+
+### Fase 1.3
+
+Se agrega en scanner.ts:
+
+1. El tipo Track. El cuál es la interfaz o contrato declarada en el roadmap.
+2. La función de escaneo usando getAssetsAsync de expo-media-library
