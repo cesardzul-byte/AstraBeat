@@ -4,7 +4,9 @@ import {
     Pressable,
     StyleSheet, 
     View, 
-    Text } from 'react-native';
+    Text,
+    FlatList,
+} from 'react-native';
 
 // Link representa navegación declarativa: Se declara el destino mediante 'href' y Expo Router se encarga de cambiar de pantalla sin tener
 // que llamar manualmente a una función. 
@@ -19,10 +21,14 @@ import {
     radii,
 } from '../src/theme/tokens'; 
 
-import { useState } from 'react';  
+// useEffect es necesario porque el escaneo no ocurre en respuesta a un click, si no como reacción de que el permiso
+// cambio a granted
+import { useState, useEffect } from 'react';  
 
 import {
-    requestLibraryPermission,
+    requestLibraryPermission, 
+    scanTracks,
+    Track
 } from '../src/library/scanner'; 
 
 /**
@@ -37,6 +43,10 @@ type PermissionState =
     | 'granted'
     | 'denied';
 
+type ScanState =
+    | 'idle'
+    | 'scanning'
+    | 'ready'
 /**
  * Vista principal de AstraBeat
  * 
