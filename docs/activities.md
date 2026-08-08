@@ -68,3 +68,14 @@ Se agrega en `scanner.ts`:
 2. La función de escaneo usando `getAssetsAsync` de `expo-media-library`.
 
 **Archivo:** `src/library/scanner.ts`
+
+### Fase 1.4 — Lista de canciones
+
+Se conecta el escaneo a la pantalla de biblioteca:
+
+1. `ScanState`, un tipo de tres valores (`idle`, `scanning`, `ready`) para distinguir "aún no se sabe" de "se escaneó y no hay canciones", el mismo razonamiento detrás de `PermissionState`.
+2. Un `useEffect` con `[permissionState]` como dependencia, que dispara el escaneo cuando el permiso pasa a `granted`.
+3. `FlatList` para mostrar las canciones, con los tres estados visibles: cargando, biblioteca vacía y lista con datos.
+4. `src/library/format.ts`, con `formatDuration` para convertir milisegundos a `m:ss`.
+
+**Archivos:** `app/index.tsx`, `src/library/format.ts`

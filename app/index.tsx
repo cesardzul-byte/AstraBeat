@@ -30,6 +30,7 @@ import {
     scanTracks,
     Track
 } from '../src/library/scanner'; 
+import { formatDuration } from '../src/library/format';
 
 /**
  * Estados posibles de la solicitud de permiso
@@ -43,10 +44,15 @@ type PermissionState =
     | 'granted'
     | 'denied';
 
+/**
+ * Son necesarias tres piezas de estado, separadas del permissionState, ya que son
+ * preguntas distintas las que debe responder: (ej: ¿tengo permiso? vs ¿ya terminé de escanear y qué encontré?)
+ */
 type ScanState =
     | 'idle'
     | 'scanning'
     | 'ready'
+
 /**
  * Vista principal de AstraBeat
  * 
@@ -55,13 +61,42 @@ type ScanState =
  */
 export default function Library() {
     // Al iniciar la pantalla, el permiso aún no se ha solicitdo
-    const [permissionState, setPermissionState]=
-    useState<PermissionState>('idle');
+    const [permissionState, setPermissionState]= useState<PermissionState>('idle');
+
+    const [scanState, setScanState] = useState<ScanState>('idle');
+
+    const [tracks, setTracks] = useState<Track[]>([]); 
+
+    /**
+     * useEffect se ejecuta cada vez que permissionState cambia, y si el permiso fue concedido,
+     * inicia el escaneo de la biblioteca de música del dispositivo
+     */
+    useEffect(() => {
+        // Se ejecuta solamente si el permiso ha sido concedido
+        if (permissionState === 'granted') {
+            // Función asíncrona dentro de useEffect para manejar la promesa devuelta por scanTracks
+            const startScanning = async () => {
+                setScanState('scanning'); 
+
+                try {
+                    const foundTracks = await scanTracks(); 
+
+                    setTracks(foundTracks); 
+                    setScanState('ready'); 
+                } catch (error) {
+                    console.error('error al escanear la biblioteca de música:', error);
+                    setScanState('idle'); 
+                }
+            }; 
+            startScanning();
+        }
+    }, [permissionState])
 
     /**
      * Solicita acceso a la biblioteca de música del dispositivo y actualiza la interfaz
      * de acuerdo a la respuesta del usuario
      */
+
     async function handleRequestPermission(){
         // Evita que el botón apareza mientras se espera la respuesta del usuario
         setPermissionState('requesting');
@@ -77,7 +112,7 @@ export default function Library() {
              * errores técnicos)
              */
             setPermissionState('denied');
-        }
+        } 
     }
     return (
         // Contenedor principal de la pantalla
@@ -111,9 +146,55 @@ export default function Library() {
             )}
 
             {permissionState === 'granted' && (
-                <Text style={styles.status}>
-                    Acceso concedido. La biblioteca de música está disponible.
-                </Text>
+                // Se usa un fragmento <> o view para agrupar los estados
+                <View style={styles.listContainer}>
+
+                    {/* Estado 1. Escaneado */}
+                    {scanState === 'scanning' && (
+                        <ActivityIndicator size="large" color={colors.accent}/>
+                    )}
+
+                    {/* Estado 2. Escaneo terminado, pero sin canciones */}
+                    {scanState === 'ready' && tracks.length === 0 && (
+                        <Text style={styles.status}>
+                            No se encontró música en el dispositivo.
+                        </Text>
+                    )}
+
+                    {/* Estado 3. Escaneo terminado y hay canciones */}
+                    {scanState === 'ready' && tracks.length > 0 && (
+                        <FlatList
+                        data={tracks}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({item}) => (
+
+                            <View style={styles.trackItem}>
+                                <View style={styles.trackInfo}>
+
+                                    {/* Tìtulo de la cancion */}
+                                    <Text style={styles.trackTitle} numberOfLines={1}>
+                                        {item.title}
+                                    </Text>
+
+                                    {/* Artista */}
+                                    <Text style={styles.trackArtist} numberOfLines={1}>
+                                        {item.artist || 'Artista desconocido'}
+                                    </Text>
+
+                                </View>
+
+                                {/* Duraciòn ya formateada */}
+                                <Text style={styles.trackDuration}>
+                                    {formatDuration(item.duration)}
+                                </Text>
+                            </View>
+                        )}
+                        // Da un pequeño margen al final de la lista para que la ùltima cancion no quede pegada al borde
+                        contentContainerStyle={{ paddingBottom: spacing.lg }}
+                        />
+                    )}
+
+                </View>
             )}
 
             {permissionState === 'denied' && (
@@ -192,4 +273,34 @@ const styles = StyleSheet.create({
         color: colors.textMuted,
         fontSize: fontSizes.body,
     },
-}); 
+    listContainer: {
+        // Permite que la lista tome todo el espacio restante en la pantalla
+        flex: 1, 
+        marginTop: spacing.sm,
+    },
+    trackItem: {
+        flexDirection: 'row', // Coloca la info y el tiempo lado a lado
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surface, // Una línea sutil para separar canciones
+    },
+    trackInfo: {
+        flex: 1, // Toma todo el espacio a la izquierda para empujar el tiempo a la derecha
+        paddingRight: spacing.md,
+    },
+    trackTitle: {
+        color: colors.text,
+        fontSize: fontSizes.body,
+        fontWeight: '600',
+    },
+    trackArtist: {
+        color: colors.textMuted,
+        fontSize: fontSizes.body, // Si tienes un fontSizes.small en tus tokens, sería ideal usarlo aquí
+    },
+    trackDuration: {
+        color: colors.textMuted,
+        fontSize: fontSizes.body,
+    },
+});
