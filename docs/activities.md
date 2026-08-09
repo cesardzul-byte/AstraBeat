@@ -79,3 +79,16 @@ Se conecta el escaneo a la pantalla de biblioteca:
 4. `src/library/format.ts`, con `formatDuration` para convertir milisegundos a `m:ss`.
 
 **Archivos:** `app/index.tsx`, `src/library/format.ts`
+
+## Fase 2 — Reproducir
+
+### Fase 2.1 — Contrato del reproductor de audio
+
+Se define en `player.ts` la interfaz del motor de audio, sin implementación todavía (llega en la fase 2.2 con `expo-audio`):
+
+1. `PlaybackStatus` y `PlayerState`, el estado observable del reproductor.
+2. Las firmas `setQueue`, `pause`, `resume`, `seek`, `next`, `prev` y `subscribe`, cada una lanzando un error explícito de "no implementado".
+
+Decisión de diseño (Opción A): el reproductor posee la cola internamente, por lo que `next()`/`prev()` no reciben parámetros. Por eso se usa `setQueue(tracks, startIndex)` en vez de `play(track)` — reproducir una sola canción es una cola de un elemento. `usePlayer.ts` (fase 2.3) reflejará este estado para React y añadirá shuffle/repeat.
+
+**Archivo:** `src/audio/player.ts`
